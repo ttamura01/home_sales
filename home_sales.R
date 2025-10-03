@@ -4,9 +4,22 @@ library(dplyr)
 library(glue)
 library(ggtext)
 library(scales)
-us_home_sales <- read_csv("/Users/takayukitamura/Documents/R_Computing/home_sales/us_existing_home_sales.csv")
+library(patchwork)
+library(fredr)
+us_home_sales <- read_csv("/Users/takayukitamura/Documents/R_Computing/home_sales/us_existing_home_sales.csv") 
 
+us_home_sales <- us_home_sales %>% 
+  mutate(existing_home_sales = if_else(year == 2024, 4.06, existing_home_sales)) 
+
+head(us_home_sales)
 tail(us_home_sales)
+
+updates <- tribble(~year, ~existing_home_sales,
+                   2025, 4.1)
+
+us_home_sales <- rbind(us_home_sales, updates)
+
+write_csv(us_home_sales, "us_existing_home_sales.csv")
 summary(us_home_sales)
 
 us_home_sales <- us_home_sales %>% 
@@ -65,14 +78,20 @@ us_home_sales %>%
   geom_density()
 
 #assess the correlation between US Population and home sales
-population <- read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=B230RC0A052NBEA&scale=left&cosd=1929-01-01&coed=2023-01-01&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Annual&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2024-11-08&revision_date=2024-11-08&nd=1929-01-01") %>% 
-  rename(date = observation_date, population = B230RC0A052NBEA)
+
+#Set my FRED API key
+fredr_set_key("0c5fd2514c7d98427fe3c931e2fcb244")
+population <- fredr(series_id = "B230RC0A052NBEA") %>% 
+  select(date, population = value)
 
 updates <- tribble(~date, ~population,
-                   "2024-01-01", 341320)
+                   "2025-01-01", 342555)
 
 population <- population %>% 
   rbind(population, updates)
+
+population <- population %>% 
+  mutate()
 
 mean(us_home_sales$existing_home_sales)
 
@@ -129,12 +148,12 @@ slope <- format(coefficients[2], digits = 5, scientific = TRUE)
 
 r.squared <- format(summary(model)$r.squared, digits = 3)
 
-home_pop_pre_gfc %>% 
+a <- home_pop_pre_gfc %>% 
   ggplot(aes(x = population, y = existing_home_sales)) +
   geom_point()+
   geom_smooth(method = "lm") +
   annotate("text", x = 255000, y = 6.0,
-           label = glue("Y = X * {slope} + {intercept} \n R^2 = {r.squared}"), color = "red", size=5, fontface = "italic") + 
+           label = glue("Y = X * {slope} + {intercept} \n R^2 = {r.squared}"), color = "red", size=3, fontface = "italic") + 
   scale_y_continuous(limits = c(2, 7.5),
                      breaks = seq(2, 7.5, 1),
                      labels = label_comma(accuracy = 0.01),
@@ -147,10 +166,10 @@ home_pop_pre_gfc %>%
     title = "US Exinging Home Sales and US Population - Pre-GFC(~2007)",
     x = "US Population (x1,000)",
     y = "US Existing Home Sales (million units)",
-    caption = "source: NRA, WSJ") +
+    caption = "source: NRA, WSJ, by Takayuki Tamura") +
   theme(
     plot.title.position = "plot",
-    plot.title = element_textbox_simple(size = 16, face = "bold",margin = margin(b=5)))
+    plot.title = element_textbox_simple(size = 14, face = "bold",margin = margin(t = 20, b=20)))
 
 ggsave("us_home_saves_pop_preGFC.png", width = 6, height = 4.5)
 
@@ -168,32 +187,64 @@ slope <- format(coefficients[2], digits = 4, scientific = TRUE)
 
 r.squared <- format(summary(model)$r.squared, digits = 3)
 
-home_pop_post_gfc %>% 
+# home_pop_post_gfc %>% 
+#   ggplot(aes(x = population, y = existing_home_sales)) +
+#   geom_point()+
+#   geom_smooth(method = "lm") +
+#   geom_point(aes(x = 335208, y = 4.09), color = "darkgreen") +
+#   geom_point(aes(x = 335893, y = 4.06), color = "darkgreen") + 
+#   geom_point(aes(x = 342555, y = 4.10), colour = "red") +
+#   annotate("text", x = 315000, y = 6.0,
+#            label = glue("Y = X * {slope} + {intercept} \n R^2 = {r.squared }"), color = "red", size = 4, fontface = "italic") +
+#   scale_y_continuous(limits = c(3.5, 6.5),
+#                      breaks = seq(3.5, 6.5, 1),
+#                      labels = label_comma(accuracy = 0.01),
+#                      expand = c(0.01,0)) +
+#   scale_x_continuous(limits = c(304000, 343000),
+#                      breaks = seq(304000, 340000, 10000),
+#                      labels = label_comma(accuracy = 0.1),
+#                      expand = c(0.01,0)) +
+#   labs(
+#     title = "US Exinging Home Sales and US Population - Post-GFC(2008~)",
+#     x = "US Population (x1,000)",
+#     y = "US Existing Home Sales (million units)",
+#     caption = "source: NRA, WSJ, by Takayuki Tamura") +
+#   theme(
+#     plot.title.position = "plot",
+#     plot.title = element_textbox_simple(size = 14, face = "bold",margin = margin(t = 20, b=20)))
+
+b <- home_pop_post_gfc %>% 
   ggplot(aes(x = population, y = existing_home_sales)) +
   geom_point()+
   geom_smooth(method = "lm") +
-  geom_point(aes(x = 335208, y = 4.09), color = "darkgreen") +
-  geom_point(aes(x = 335893, y = 4.06), color = "red", size =3) + 
+  annotate("point", x = 335208, y = 4.09, color = "darkgreen" ) +
+  annotate("point", x = 337141, y = 4.06, color = "darkgreen") + 
+  annotate("point", x = 340212, y = 4.10, color = "red", size = 3) +
+  annotate("text", x = 340212, y = 4.10, label = "2025", vjust = -1) +
   annotate("text", x = 315000, y = 6.0,
-           label = glue("Y = X * {slope} + {intercept} \n R^2 = {r.squared }"), color = "red", fontface = "italic") +
+           label = glue("Y = X * {slope} + {intercept} \n R^2 = {r.squared }"), size = 3, color = "red", fontface = "italic") +
   scale_y_continuous(limits = c(3.5, 6.5),
                      breaks = seq(3.5, 6.5, 1),
                      labels = label_comma(accuracy = 0.01),
                      expand = c(0.01,0)) +
-  scale_x_continuous(limits = c(304000, 337000),
-                     breaks = seq(304000, 337000, 10000),
+  scale_x_continuous(limits = c(304000, 343000),
+                     breaks = seq(304000, 340000, 10000),
                      labels = label_comma(accuracy = 0.1),
                      expand = c(0.01,0)) +
   labs(
     title = "US Exinging Home Sales and US Population - Post-GFC(2008~)",
     x = "US Population (x1,000)",
     y = "US Existing Home Sales (million units)",
-    caption = "source: NRA, WSJ") +
+    caption = "source: NRA, WSJ, by Takayuki Tamura") +
   theme(
     plot.title.position = "plot",
-    plot.title = element_text(margin = margin(b=5)))
+    plot.title = element_textbox_simple(size = 14, face = "bold",margin = margin(t = 20, b=20)))
 
 ggsave("us_home_saves_pop_postGFC.png", width = 6, height = 4.5)
+
+a + b
+
+ggsave("us_population_home_sales.png", width = 8.3, height = 5.2)
 
 ### prediction
 
