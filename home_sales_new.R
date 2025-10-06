@@ -3,6 +3,7 @@ library(glue)
 library(ggtext)
 library(scales)
 library(patchwork)
+library(fredr)
 # optional for nice model extraction
 # library(broom)
 
@@ -16,8 +17,11 @@ population <- fredr(series_id = "B230RC0A052NBEA") %>%
 updates <- tribble(~date, ~population,
                    "2025-01-01", 342555)
 
-population <- population %>% 
+population <- population %>%
   rbind(., updates)
+
+# us_home_sales <- us_home_sales %>% 
+#   mutate(existing_home_sales = if_else(year == 2025, 4.05, existing_home_sales))
 
 home_pop <- population %>% 
   mutate(year = year(date)) %>% 
@@ -146,4 +150,4 @@ p4 <- home_pop_trend %>%
 
 # Layout & save
 final_plot <- p1 / (p2 + p3) / p4 + plot_layout(heights = c(1, 1, 0.8))
-ggsave("home_sales_population_trend.png", final_plot, width = 10, height = 12, dpi = 300)
+ggsave("home_sales_population_trend.png", final_plot, width = 12, height = 10, dpi = 300)
