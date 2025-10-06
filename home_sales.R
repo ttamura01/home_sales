@@ -22,8 +22,8 @@ us_home_sales <- rbind(us_home_sales, updates)
 write_csv(us_home_sales, "us_existing_home_sales.csv")
 summary(us_home_sales)
 
-us_home_sales <- us_home_sales %>% 
-  mutate(existing_home_sales = ifelse(year == 2024, 4.06, existing_home_sales))
+# us_home_sales <- us_home_sales %>% 
+#   mutate(existing_home_sales = ifelse(year == 2024, 4.06, existing_home_sales))
 
 us_home_sales %>% 
   summarise(mean = mean(existing_home_sales),
@@ -43,26 +43,26 @@ highlight_data <- us_home_sales %>%
 
 us_home_sales$latest_data <- ifelse(us_home_sales$year == max(us_home_sales$year), TRUE, FALSE)
 
-us_home_sales %>% 
+p1 <- us_home_sales %>% 
   ggplot(aes(x = year, y = existing_home_sales, fill = latest_data)) +
   geom_col(show.legend = FALSE) +
   geom_text(data = subset(us_home_sales, latest_data == TRUE),
-            aes(label = glue("{existing_home_sales}")), 
-            vjust = -0.5, hjust = 0.75, fontface = "bold", color = "blue", size = 6 ) +
+            aes(label = glue("Est.\n{existing_home_sales}mil")), 
+            vjust = -0.5, hjust = 0.5, fontface = "bold", color = "blue", size = 4) +
   scale_fill_manual(breaks = c(FALSE, TRUE),
                     values = c("#AAAAAA", "#0000FF")) +
   scale_y_continuous(limits = c(0, 7.5),
                      breaks = seq(0, 6, 2),
                      labels = label_comma(accuracy = 0.01),
                      expand = c(0,0)) +
-  scale_x_continuous(limits = c(1980, 2025),
+  scale_x_continuous(limits = c(1980, 2026),
                      expand = c(0.01,0)) +
-  labs(title = "US Existing Home Sales in November at 4.15mil (annualized), recovered from recent level but still low",
+  labs(title = "US Existing Home Sales between 1981 and 2025(Est.)",
        x = NULL,
        y = "US Existing Home Sales (Million Units)",
-       caption = "source: NRA, WSJ") +
+       caption = "source: NRA, WSJ, by Takayuki Tamura") +
   theme(
-    plot.title.position = "plot",
+    plot.title.position = "panel",
     plot.title = element_textbox_simple(size = 16, face = "bold")
     )
 
@@ -90,8 +90,8 @@ updates <- tribble(~date, ~population,
 population <- population %>% 
   rbind(population, updates)
 
-population <- population %>% 
-  mutate()
+# population <- population %>% 
+#   mutate()
 
 mean(us_home_sales$existing_home_sales)
 
@@ -105,28 +105,28 @@ tail(home_pop)
 model <- lm(existing_home_sales~population, data = home_pop)
 summary(model)
 
-home_pop %>% 
-  ggplot(aes(x = population, y = existing_home_sales)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(limits = c(2, 7.5),
-                     breaks = seq(2, 7.5, 1),
-                     labels = label_comma(accuracy = 0.01),
-                     expand = c(0.01,0)) +
-  scale_x_continuous(limits = c(250000, 340000),
-   breaks = seq(240000, 340000, 25000),
-   labels = label_comma(accuracy = 0.1),
-   expand = c(0.01,0)) +
-  labs(
-    title = "US Exinging Home Sales and US Population",
-    x = "US Population (x1,000)",
-    y = "US Existing Home Sales (million units)",
-    caption = "source: NRA, WSJ"
-  ) +
-  theme(
-    plot.title.position = "plot",
-    plot.title = element_textbox_simple(size = 16, face = "bold")
-  )
+# home_pop %>% 
+#   ggplot(aes(x = population, y = existing_home_sales)) +
+#   geom_point() +
+#   geom_smooth(method = "lm") +
+#   scale_y_continuous(limits = c(2, 7.5),
+#                      breaks = seq(2, 7.5, 1),
+#                      labels = label_comma(accuracy = 0.01),
+#                      expand = c(0.01,0)) +
+#   scale_x_continuous(limits = c(250000, 345000),
+#    breaks = seq(240000, 340000, 25000),
+#    labels = label_comma(accuracy = 0.1),
+#    expand = c(0.01,0)) +
+#   labs(
+#     title = "US Exinging Home Sales and US Population between 1981 and 2025(Est.)",
+#     x = "US Population (x1,000)",
+#     y = "US Existing Home Sales (million units)",
+#     caption = "source: NRA, WSJ"
+#   ) +
+#   theme(
+#     plot.title.position = "panel",
+#     plot.title = element_textbox_simple(size = 16, face = "bold")
+#   )
 
 model <- lm(existing_home_sales~population, data = home_pop)
 summary(model)
@@ -139,6 +139,7 @@ home_pop_pre_gfc <- home_pop %>%
   filter(year <= 2007)
 
 model <- lm(existing_home_sales~population, data = home_pop_pre_gfc)
+summary(model)
 
 coefficients <-  coef(model)
 
@@ -148,7 +149,7 @@ slope <- format(coefficients[2], digits = 5, scientific = TRUE)
 
 r.squared <- format(summary(model)$r.squared, digits = 3)
 
-a <- home_pop_pre_gfc %>% 
+p2 <- home_pop_pre_gfc %>% 
   ggplot(aes(x = population, y = existing_home_sales)) +
   geom_point()+
   geom_smooth(method = "lm") +
@@ -168,7 +169,7 @@ a <- home_pop_pre_gfc %>%
     y = "US Existing Home Sales (million units)",
     caption = "source: NRA, WSJ, by Takayuki Tamura") +
   theme(
-    plot.title.position = "plot",
+    plot.title.position = "panel",
     plot.title = element_textbox_simple(size = 14, face = "bold",margin = margin(t = 20, b=20)))
 
 ggsave("us_home_saves_pop_preGFC.png", width = 6, height = 4.5)
@@ -178,7 +179,7 @@ home_pop_post_gfc <- home_pop %>%
   filter(year >= 2008 & year <= 2022)
 
 model <- lm(existing_home_sales~population, data = home_pop_post_gfc)
-
+summary(model)
 coefficients <-  coef(model)
 
 intercept <- format(coefficients[1], digits = 4, scientific = TRUE)
@@ -213,7 +214,7 @@ r.squared <- format(summary(model)$r.squared, digits = 3)
 #     plot.title.position = "plot",
 #     plot.title = element_textbox_simple(size = 14, face = "bold",margin = margin(t = 20, b=20)))
 
-b <- home_pop_post_gfc %>% 
+p3 <- home_pop_post_gfc %>% 
   ggplot(aes(x = population, y = existing_home_sales)) +
   geom_point()+
   geom_smooth(method = "lm") +
@@ -237,12 +238,12 @@ b <- home_pop_post_gfc %>%
     y = "US Existing Home Sales (million units)",
     caption = "source: NRA, WSJ, by Takayuki Tamura") +
   theme(
-    plot.title.position = "plot",
+    plot.title.position = "panel",
     plot.title = element_textbox_simple(size = 14, face = "bold",margin = margin(t = 20, b=20)))
 
 ggsave("us_home_saves_pop_postGFC.png", width = 6, height = 4.5)
 
-a + b
+p1/(p2 + p3)
 
 ggsave("us_population_home_sales.png", width = 8.3, height = 5.2)
 
