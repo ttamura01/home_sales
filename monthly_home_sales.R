@@ -17,7 +17,7 @@ tail(home_sales)
 #   select(date, existing_home_sales)
 
 updates <- tribble(~date, ~existing_home_sales,
-                   "2025-08-01", 4000000) %>% 
+                   "2025-09-01", 4060000) %>% 
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 
@@ -95,7 +95,7 @@ home_sales %>%
             vjust = -0.2, hjust = 0.65, fontface = "bold", color = "blue", size = 6, lineheight = .75 ) +
   # scale_x_continuous(limits = c(2023-09-01, ))
   labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,2)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
-       caption = "National Association of Realtors", 
+       caption = "Source: National Association of Realtors, by Takayuki Tamura", 
        x = NULL, 
        y = "Annualized Home Sales (mil)",
        
