@@ -110,3 +110,5 @@ home_sales %>%
   )
 
 ggsave("existing_home_sales_monthly_line.png", height = 5.5, width = 6.0)
+
+
