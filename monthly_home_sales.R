@@ -7,7 +7,7 @@ library(glue)
 library(ggtext)
 library(scales)
 
-home_sales <- read_csv("/Users/takayukitamura/Documents/R_Computing/home_sales/monthly_homesales.csv") #%>% 
+home_sales <- read_csv("monthly_homesales.csv") #%>% 
 # rename(date = DATE, existing_home_sales = EXHOSLUSM495S)
 
 head(home_sales)
@@ -17,14 +17,14 @@ tail(home_sales)
 #   select(date, existing_home_sales)
 
 updates <- tribble(~date, ~existing_home_sales,
-                   "2025-09-01", 4060000) %>% 
+                   "2025-10-01", 4100000) %>% 
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 
 home_sales <- rbind(home_sales, updates) #%>% 
 # mutate(home_sales_mil = existing_home_sales/1000000)
 
-write_csv(home_sales, "/Users/takayukitamura/Documents/R_Computing/home_sales/monthly_homesales.csv")
+write_csv(home_sales, "monthly_homesales.csv")
 
 home_sales$latest_data <- ifelse(home_sales$date == max(home_sales$date), TRUE, FALSE)
 
@@ -78,7 +78,7 @@ home_sales %>%
   theme_classic() +
   theme(
     plot.title.position = "plot",
-    plot.title = element_textbox_simple(size = 14, face = "bold", margin = margin(b = 0.9)),
+    #plot.title = element_textbox_simple(size = 14, face = "bold", margin = margin(b = 0.9)),
     plot.subtitle = element_textbox_simple(face = "italic"),
     axis.title.y = element_text(size = 13, face = "bold"),
     axis.text = element_text(size = 12, face = "bold")
