@@ -150,4 +150,6 @@ p4 <- home_pop_trend %>%
 
 # Layout & save
 final_plot <- p1 / (p2 + p3) / p4 + plot_layout(heights = c(1, 1, 0.8))
+p1 / (p2 + p3)
+
 ggsave("home_sales_population_trend.png", final_plot, width = 12, height = 10, dpi = 300)
