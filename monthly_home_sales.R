@@ -7,8 +7,15 @@ library(glue)
 library(ggtext)
 library(scales)
 
+# home_sales_1 <- read_csv("home_sales_1.csv") %>% 
+#   select(-"...4" )
+
+
 home_sales <- read_csv("monthly_homesales.csv") #%>% 
 # rename(date = DATE, existing_home_sales = EXHOSLUSM495S)
+# home_sales <- home_sales[-34, ] %>% tail()
+# 
+# home_sales <- home_sales[c(45, 46, 47, 49, 50, 51, 58),]
 
 head(home_sales)
 tail(home_sales)
@@ -67,7 +74,7 @@ home_sales %>%
   scale_fill_manual(breaks = c(TRUE, FALSE),
                     values = c("#0000FF", "#AAAAAA")) +
   # scale_x_date(limits = c(min(home_sales$date)-2, max(home_sales$date) + 6)) +
-  scale_y_continuous(limits = c(0, 4.5),
+  scale_y_continuous(limits = c(0, 6.5),
                      breaks = seq(0, 5, 1),
                      label = seq(0, 5, 1)) +
   labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,2)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
