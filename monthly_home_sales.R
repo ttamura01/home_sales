@@ -24,7 +24,7 @@ tail(home_sales)
 #   select(date, existing_home_sales)
 
 updates <- tribble(~date, ~existing_home_sales,
-                   "2025-11-01", 4130000) %>% 
+                   "2025-12-01", 4350000) %>% 
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 
