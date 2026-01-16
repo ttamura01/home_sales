@@ -20,8 +20,12 @@ fredr_set_key("0c5fd2514c7d98427fe3c931e2fcb244")
 population <- fredr(series_id = "B230RC0A052NBEA") %>% 
   select(date, population = value)
 
-# updates <- tribble(~date, ~population,
-#                    "2025-01-01", 342555)
+# fredr(series_id = "POPTHM") %>% 
+#   select(date, population = value)
+
+
+updates <- tribble(~date, ~population,
+                   "2025-01-01", 342741)
 
 population <- population %>%
   rbind(., updates)
@@ -162,7 +166,7 @@ p4 <- home_pop_trend %>%
   scale_fill_manual(values = c("TRUE"="#e76f51","FALSE"="#2a9d8f")) +
   labs(title = "Deviation from Population-Based Trend (Post-GFC model)",
        subtitle = "Millions of units: positive = above trend, negative = below trend",
-       x = NULL, y = "Actual – Trend (millions)", caption = "Trend from 2008–2022 regression") +
+       x = NULL, y = "Actual – Trend (millions)", caption = "Source: NAR (sales), BEA/Census via FRED (population). Chart: Takayuki Tamura") +
   theme(
     legend.position = "none",
     panel.background = element_blank())
@@ -172,3 +176,4 @@ final_plot <- p1 / (p2 + p3) / p4 + plot_layout(heights = c(1, 1, 0.8))
 p1 / (p2 + p3)
 
 ggsave("home_sales_population_trend.png", final_plot, width = 12, height = 10, dpi = 300)
+
