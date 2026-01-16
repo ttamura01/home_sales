@@ -8,14 +8,20 @@ library(fredr)
 # library(broom)
 
 us_home_sales <- read_csv("/Users/takayukitamura/Documents/R_Computing/home_sales/us_existing_home_sales.csv") 
+us_home_sales[45,]
+us_home_sales <- us_home_sales %>% 
+  mutate(existing_home_sales = ifelse(year == 2025, 4.06,
+                existing_home_sales))
+
+write_csv(us_home_sales, "/Users/takayukitamura/Documents/R_Computing/home_sales/us_existing_home_sales.csv")
 
 #Set my FRED API key
 fredr_set_key("0c5fd2514c7d98427fe3c931e2fcb244")
 population <- fredr(series_id = "B230RC0A052NBEA") %>% 
   select(date, population = value)
 
-updates <- tribble(~date, ~population,
-                   "2025-01-01", 342555)
+# updates <- tribble(~date, ~population,
+#                    "2025-01-01", 342555)
 
 population <- population %>%
   rbind(., updates)
@@ -76,14 +82,24 @@ p1 <- home_pop_trend %>%
          below_trend = if_else(year >= 2023 & gap_mn < 0, TRUE, FALSE)) %>%
   ggplot(aes(year, existing_home_sales, fill = below_trend)) +
   geom_col() +
-  geom_text(data = ~ filter(.x, is_latest),
-            aes(label = glue("Est.\n{round(existing_home_sales,2)}M")),
-            vjust = -0.6, fontface = "bold", color = "blue", size = 3.8) +
+  # geom_text(data = ~ filter(.x, is_latest),
+  #           aes(label = glue("Existing Home Sales\n in 2025\n{round(existing_home_sales,2)}M")),
+  #           vjust = -0.6, fontface = "bold", color = "blue", size = 3.8) +
+  annotate(geom = "text",
+           x = 2025,
+           y = 6.5,
+              label = glue("Existing\n Home Sales\n in 2025\n4.06M"),
+          fontface = "bold", color = "blue", size = 3.8) +
+  annotate(geom = "segment",
+           x = 2025, xend = 2025,
+           y = 5.5, yend = 4.06,
+           arrow = arrow(length = unit(7, "pt")),
+           color = "blue") + 
   scale_fill_manual(values = c(`TRUE` = "#f4a261", `FALSE` = "#9aa0a6")) +
   scale_y_continuous(limits = c(0, 7.5), labels = label_number(accuracy = 0.01)) +
   coord_cartesian(clip = "off") +
   labs(
-    title = "US Existing Home Sales (1981–2025 est.)",
+    title = "US Existing Home Sales (1981–2025)",
     subtitle = "Shaded bars (since 2023) indicate actual sales below the population-based trend",
     x = NULL, y = "Existing Home Sales (Million Units)",
     caption = "Source: NAR (sales), BEA/Census via FRED (population). Chart: Takayuki Tamura"
@@ -91,9 +107,12 @@ p1 <- home_pop_trend %>%
   theme(
     plot.title.position = "plot",
     plot.title = element_textbox_simple(size = 16, face = "bold"),
+    plot.margin = margin(t = 10, r = 30),
     legend.position = "none",
     panel.background = element_blank()
   )
+
+p1
 
 # p2: pre-GFC
 p2 <- home_pop_pre %>%
