@@ -11,11 +11,20 @@ library(scales)
 #   select(-"...4" )
 
 
-home_sales <- read_csv("monthly_homesales.csv") #%>% 
+home_sales <- read_csv("monthly_homesales.csv") %>% 
+  select(date, existing_home_sales) 
+
+home_sales[52,] <- 4270
+
 # rename(date = DATE, existing_home_sales = EXHOSLUSM495S)
+
 # home_sales <- home_sales[-34, ] %>% tail()
-# 
-# home_sales <- home_sales[c(45, 46, 47, 49, 50, 51, 58),]
+
+home_sales <- home_sales %>% 
+  mutate(existing_home_sales = case_when(date == "2025-10-01" ~ 4110000,
+                                         date == "2025-11-01" ~ 4140000,
+                                         TRUE ~ existing_home_sales)) %>% 
+  mutate(home_sales_mil = existing_home_sales/1000000)
 
 head(home_sales)
 tail(home_sales)
@@ -24,7 +33,7 @@ tail(home_sales)
 #   select(date, existing_home_sales)
 
 updates <- tribble(~date, ~existing_home_sales,
-                   "2025-12-01", 4350000) %>% 
+                   "2026-01-01", 3910000) %>% 
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 
@@ -51,12 +60,7 @@ latest_month <- latest_month %>%
   mutate(month_label = month(date, label = TRUE, abbr = FALSE),
          previous_month_label = month(date %m-% months(1), label = TRUE, abbr = FALSE))
 
-# latest_month_label <- latest_month[7]
-# previous_month_label <- latest_month[8]
-# latest_home_sales <- latest_month[,3] 
-# latest_yoy_change <- latest_month[,5]
-# latest_mom_change <- latest_month[6]
-
+latest_date <- latest_month$date
 latest_month_label <- latest_month$month_label
 previous_month_label <- latest_month$previous_month_label
 latest_home_sales <- latest_month$home_sales_mil
@@ -77,7 +81,7 @@ home_sales %>%
   scale_y_continuous(limits = c(0, 6.5),
                      breaks = seq(0, 5, 1),
                      label = seq(0, 5, 1)) +
-  labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,2)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
+  labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,1)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
        #subtitle = "Despite the High home prices and mortgage rates continue to weigh on sales activity", 
        caption = "National Association of Realtors", 
        x = NULL,
@@ -101,7 +105,7 @@ home_sales %>%
             aes(label = glue("{home_sales_mil}\n mil")), 
             vjust = -0.2, hjust = 0.65, fontface = "bold", color = "blue", size = 6, lineheight = .75 ) +
   # scale_x_continuous(limits = c(2023-09-01, ))
-  labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,2)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
+  labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,1)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
        caption = "Source: National Association of Realtors, by Takayuki Tamura", 
        x = NULL, 
        y = "Annualized Home Sales (mil)",
@@ -119,3 +123,47 @@ home_sales %>%
 ggsave("existing_home_sales_monthly_line.png", height = 5.5, width = 6.0)
 
 
+home_sales %>% 
+  ggplot(aes(x = date, y = home_sales_mil, fill = latest_data)) +
+  geom_col(show.legend = FALSE) +
+  # geom_text(data = subset(home_sales, latest_data == TRUE),
+  #           aes(label = glue("{home_sales_mil}\n mil")), 
+  #           vjust = -0.2, hjust = 0.65, fontface = "bold", color = "blue", size = 6, lineheight = .75 ) +
+  annotate(geom = "text",
+           x = as.Date("2026-01-01"),
+           y = max(home_sales$home_sales_mil) * 0.975,
+           label = glue("{latest_month_label}:{latest_home_sales} million"),
+           color = "#0000FF",
+           fontface="bold",
+           hjust = 0.95) +
+  annotate(geom = "segment",
+           x = as.Date(latest_date),
+           y =  max(home_sales$home_sales_mil)* 0.95,
+           yend = latest_home_sales * 1.0,
+           color = "#0000FF") +
+  scale_fill_manual(breaks = c(TRUE, FALSE),
+                    values = c("#0000FF", "#AAAAAA")) +
+  # scale_x_date(limits = c(min(home_sales$date)-2, max(home_sales$date) + 6)) +
+  # scale_y_continuous(limits = c(0, 6.5),
+  #                    breaks = seq(0, 5, 1),
+  #                    label = seq(0, 5, 1)) +
+  coord_cartesian(expand = FALSE, clip = "on", 
+                  ylim = c(3, 6.5),
+                  xlim = c(as.Date("2021-09-01"), as.Date("2026-02-01"))) + 
+  labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,1)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
+       #subtitle = "Despite the High home prices and mortgage rates continue to weigh on sales activity", 
+       caption = "National Association of Realtors, by Takayuki Tamura", 
+       x = NULL,
+       y = "Exingting Home Sales (mil)") +
+  theme_classic() +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_textbox_simple(face = "bold", margin = margin(10,5)),
+    #plot.title = element_textbox_simple(size = 14, face = "bold", margin = margin(b = 0.9)),
+    plot.subtitle = element_textbox_simple(face = "italic"),
+    axis.title.y = element_text(size = 13, face = "bold"),
+    axis.text = element_text(size = 12, face = "bold"),
+    plot.margin = margin_auto(5,10)
+  )
+
+ggsave("existing_home_sales_monthly_col.png", height = 5.5, width = 6.0)
