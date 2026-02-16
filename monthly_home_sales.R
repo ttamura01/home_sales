@@ -21,9 +21,9 @@ home_sales[52,] <- 4270
 # home_sales <- home_sales[-34, ] %>% tail()
 
 home_sales <- home_sales %>% 
-  mutate(existing_home_sales = case_when(date == "2025-10-01" ~ 4110000,
-                                         date == "2025-11-01" ~ 4140000,
-                                         TRUE ~ existing_home_sales)) %>% 
+  # mutate(existing_home_sales = case_when(date == "2025-10-01" ~ 4110000,
+  #                                        date == "2025-11-01" ~ 4140000,
+  #                                        TRUE ~ existing_home_sales)) %>% 
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 head(home_sales)
