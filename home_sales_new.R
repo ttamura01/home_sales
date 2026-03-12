@@ -24,11 +24,11 @@ population <- fredr(series_id = "B230RC0A052NBEA") %>%
 #   select(date, population = value)
 
 
-updates <- tribble(~date, ~population,
-                   "2025-01-01", 342741)
-
-population <- population %>%
-  rbind(., updates)
+# updates <- tribble(~date, ~population,
+#                    "2025-01-01", 342741)
+# 
+# population <- population %>%
+#   rbind(., updates)
 
 # us_home_sales <- us_home_sales %>% 
 #   mutate(existing_home_sales = if_else(year == 2025, 4.05, existing_home_sales))
@@ -177,3 +177,18 @@ p1 / (p2 + p3)
 
 ggsave("home_sales_population_trend.png", final_plot, width = 12, height = 10, dpi = 300)
 
+sales <- read_csv("/Users/takayukitamura/Desktop/EXHOSLUSM495N.csv") %>% 
+  rename(date = observation_date, sales = EXHOSLUSM495N)
+
+updates <- tribble(~date, ~sales,
+                  as.Date("2025-01-01"), 240000)
+sales <- sales %>% 
+  rbind(updates) %>% 
+  arrange(date)
+
+head(sales)
+tail(sales)
+
+sales %>% 
+  filter(date <= "2025-12-01") %>% 
+  summarise(total = sum(sales))
