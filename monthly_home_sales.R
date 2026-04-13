@@ -21,9 +21,9 @@ home_sales <- read_csv("monthly_homesales.csv") %>%
 # home_sales <- home_sales[-34, ] %>% tail()
 
 home_sales <- home_sales %>% 
-  # mutate(existing_home_sales = case_when(date == "2026-01-01" ~ 4020000,
+  mutate(existing_home_sales = case_when(date == "2026-02-01" ~ 4130000,
   #                                        date == "2025-09-01" ~ 4080000,
-  #                                        TRUE ~ existing_home_sales)) %>%
+                                         TRUE ~ existing_home_sales)) %>%
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 head(home_sales)
@@ -33,7 +33,7 @@ tail(home_sales)
 #   select(date, existing_home_sales)
 
 updates <- tribble(~date, ~existing_home_sales,
-                   "2026-02-01", 4090000) %>% 
+                   "2026-03-01", 3980000) %>% 
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 
@@ -149,7 +149,7 @@ home_sales %>%
   #                    label = seq(0, 5, 1)) +
   coord_cartesian(expand = FALSE, clip = "on", 
                   ylim = c(3, 6.5),
-                  xlim = c(as.Date("2021-08-01"), as.Date("2026-03-01"))) + 
+                  xlim = c(as.Date("2021-08-01"), as.Date("2026-04-01"))) + 
   labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,1)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
        #subtitle = "Despite the High home prices and mortgage rates continue to weigh on sales activity", 
        caption = "National Association of Realtors, by Takayuki Tamura", 
