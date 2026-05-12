@@ -14,16 +14,16 @@ library(scales)
 home_sales <- read_csv("monthly_homesales.csv") %>% 
   select(date, existing_home_sales) 
 
-# home_sales[53,] <- 4020000
+# home_sales[55,] <- 
 
 # rename(date = DATE, existing_home_sales = EXHOSLUSM495S)
 
-# home_sales <- home_sales[-34, ] %>% tail()
+home_sales <- home_sales[-55, ] %>% tail()
 
 home_sales <- home_sales %>% 
-  mutate(existing_home_sales = case_when(date == "2026-02-01" ~ 4130000,
-  #                                        date == "2025-09-01" ~ 4080000,
-                                         TRUE ~ existing_home_sales)) %>%
+  # mutate(existing_home_sales = case_when(date == "2026-03-01" ~ 4010000,
+  #                                        date == "2026-04-01" ~ 4020000,
+  #                                        TRUE ~ existing_home_sales)) %>%
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 head(home_sales)
@@ -33,7 +33,8 @@ tail(home_sales)
 #   select(date, existing_home_sales)
 
 updates <- tribble(~date, ~existing_home_sales,
-                   "2026-03-01", 3980000) %>% 
+                   "2026-03-01", 4010000,
+                   "2026-04-01", 4020000) %>% 
   mutate(home_sales_mil = existing_home_sales/1000000)
 
 
@@ -67,7 +68,8 @@ latest_home_sales <- latest_month$home_sales_mil
 latest_yoy_change <- latest_month$yoy_change
 latest_mom_change <- latest_month$mom_change
 latest_mom_change_status <- latest_month$mom_change_status
-
+lowest_sales <- min(home_sales$home_sales_mil)
+highest_sales <- max(home_sales$home_sales_mil)
 
 home_sales %>% 
   ggplot(aes(x = date, y = home_sales_mil, fill = latest_data)) +
@@ -103,8 +105,9 @@ home_sales %>%
   geom_line(show.legend = FALSE) +
   geom_text(data = subset(home_sales, latest_data == TRUE),
             aes(label = glue("{home_sales_mil}\n mil")), 
-            vjust = -0.2, hjust = 0.65, fontface = "bold", color = "blue", size = 6, lineheight = .75 ) +
-  # scale_x_continuous(limits = c(2023-09-01, ))
+            vjust = 1, hjust = 0.65, fontface = "bold", color = "blue", size = 6, lineheight = .75 ) +
+  # scale_x_continuous(limits = c(2023-09-01, )) +
+  scale_y_continuous(limits = c(lowest_sales*0.9, NA)) +
   labs(title = glue("Home Sales in {latest_month_label} {latest_mom_change_status} {round(latest_mom_change,1)}% from {previous_month_label} to the SAAR at {latest_home_sales} mil"),
        caption = "Source: National Association of Realtors, by Takayuki Tamura", 
        x = NULL, 
